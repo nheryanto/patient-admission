@@ -1,0 +1,10 @@
+index;patient_id;room_type;admission_date;discharge_date;status
+0;"P-3";"kelas_3";"2023-04-06";"2023-04-10";"COMPLETED"
+1;"P-1";"kelas_2";"2023-04-10";"2023-04-11";"COMPLETED"
+2;"P-2";"kelas_1";"2023-04-17";"2023-04-20";"COMPLETED"
+3;"P-1";"kelas_3";"2023-05-01";"2023-05-03";"COMPLETED"
+4;"P-0";"kelas_1";"2023-05-22";"N/A";"ONGOING"
+5;"P-1";"kelas_3";"2023-05-22";"N/A";"ONGOING"
+6;"P-2";"vip";"2023-05-22";"N/A";"ONGOING"
+7;"P-3";"kelas_2";"2023-05-22";"N/A";"ONGOING"
+8;"P-4";"kelas_1";"2023-05-22";"N/A";"ONGOING"
