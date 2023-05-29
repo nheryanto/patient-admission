@@ -9,6 +9,10 @@ from patientdata import modify_patient, modify_room
 from patientdata import delete_patient, delete_room, delete_bed
 from patientdata import isEmptyDatabase, isAvailableRoom
 
+from patientdata import get_most_recent_bed_data, display_selected_data
+from patientdata import input_room_type
+
+
 def clear_screen():
     """
     Function to clear user's screen
@@ -116,7 +120,20 @@ def load_bed(FILE_PATH):
     file.close()
     return database
 
-### INCOMPLETE: show bed count in add new admission ###
+def dict_of_list_to_csv(FILE_PATH, database):
+    file = open(FILE_PATH, "w", newline='')
+    writer = csv.writer(file, delimiter=";")
+    writer.writerows(database.values())
+    file.close()
+
+def list_of_dict_to_csv(FILE_PATH, database):
+    file = open(FILE_PATH, "w", newline='')
+    writer = csv.writer(file, delimiter=";")
+    database = [database[0]] + [row.values() for row in database[1:]]
+    writer.writerows(database)
+    file.close()
+
+### INCOMPLETE: TOTAL PATIENT DATABASE ###
 def main():
     """
     Main program to run the entire process
@@ -136,19 +153,24 @@ def main():
         
         if response == choices[0]:
             while True:
-                # display submenu
                 prompt = "\nPlease select one of the following:\n"
                 choices = ["Display patient data",
-                           "Display room data",
-                           "Display bed data",
-                           "Return to main menu"]
+                        "Display room data",
+                        "Display bed data",
+                        "Return to main menu"]
                 response = pyip.inputMenu(prompt=prompt, choices=choices, numbered=True)
                 
                 if response == choices[0]:
-                    display_patient(database=patient_db)          
+                    if isEmptyDatabase(patient_db):
+                        print("Patient database empty. Please add new patient first.")
+                    else:
+                        display_patient(database=patient_db)          
 
                 elif response == choices[1]:
-                    display_room(database=room_db)
+                    if isEmptyDatabase(room_db):
+                        print("Room database empty. Please add new patient or new visit first.")
+                    else:
+                        display_room(database=room_db)
 
                 elif response == choices[2]:
                     display_bed(database=bed_db)
@@ -158,43 +180,41 @@ def main():
         
         elif response == choices[1]:
             while True:
-                prompt = "\nEnter desired room type:\n"
-                choices = ["VVIP", "VIP", "Kelas 1", "Kelas 2", "Kelas 3", "Return to main menu"]
-                room_type = pyip.inputMenu(prompt=prompt, choices=choices, numbered=True)
+                most_recent_data, bed_header = get_most_recent_bed_data(bed_db)
+                display_selected_data(most_recent_data[1:], bed_header[1:], title="=== Bed Availability ===")
 
-                if room_type == choices[-1]:
+                room_type, isBreak = input_room_type()
+
+                if isBreak:
                     break
-                
-                else:
-                    if ' ' in room_type:
-                        room_type = '_'.join(room_type.split())
-
-                    if isAvailableRoom(bed_db, room_type):
-                        ### show most recent bed counts ###
-                        while True:
-                            prompt = "\nPlease select one of the following:\n"
-                            choices = ["Add new patient",
-                                       "Add new visit",
-                                       "Return to previous menu"]
-                            response = pyip.inputMenu(prompt=prompt, choices=choices, numbered=True)
             
-                            if response == choices[0]:
-                                add_new_patient(patient_database=patient_db, room_database=room_db,
-                                                bed_database=bed_db, room_type=room_type)
-                                
-                            elif response == choices[1]:
+                if isAvailableRoom(most_recent_data, bed_header, room_type):
+                    while True:
+                        prompt = "\nPlease select one of the following:\n"
+                        choices = ["Add new patient",
+                                   "Add new visit",
+                                   "Return to previous menu"]
+                        response = pyip.inputMenu(prompt=prompt, choices=choices, numbered=True)
+        
+                        if response == choices[0]:
+                            add_new_patient(patient_database=patient_db, room_database=room_db,
+                                            bed_database=bed_db, room_type=room_type)
+                            
+                        elif response == choices[1]:
+                            if isEmptyDatabase(patient_db):
+                                print("Patient database empty. Please add new patient first.")
+                            else:
                                 add_new_visit(patient_database=patient_db, room_database=room_db,
                                               bed_database=bed_db, room_type=room_type)
-                            
-                            else:
-                                break
-                    
-                    else:
-                        ### show most recent bed counts ###
-                        prompt = "\nRoom is not available. Reenter desired room type? (yes/no): "
-                        response = pyip.inputYesNo(prompt=prompt)
-                        if response == "yes": continue
-                        else: break
+                        
+                        else:
+                            break
+                
+                else:
+                    prompt = "\nRoom is not available. Reenter desired room type? (yes/no): "
+                    response = pyip.inputYesNo(prompt=prompt)
+                    if response == "yes": continue
+                    else: break
 
         elif response == choices[2]:
             while True:
@@ -205,11 +225,17 @@ def main():
                 response = pyip.inputMenu(prompt=prompt, choices=choices, numbered=True)
 
                 if response == choices[0]:
-                    modify_patient(patient_database=patient_db)
+                    if isEmptyDatabase(patient_db):
+                        print("Patient database empty. Please add new patient first.")
+                    else:
+                        modify_patient(patient_database=patient_db)
 
                 elif response == choices[1]:
-                    modify_room(room_database=room_db,
-                                bed_database=bed_db)
+                    if isEmptyDatabase(room_db):
+                        print("Room database empty. Please add new patient or new visit first.")
+                    else:
+                        modify_room(room_database=room_db,
+                                    bed_database=bed_db)
                 
                 else:
                     break
@@ -223,15 +249,19 @@ def main():
                            "Return to main menu"]
                 response = pyip.inputMenu(prompt=prompt, choices=choices, numbered=True)
 
-                ### check empty database ###
-                ### case study: if all patient & room data deleted ###
                 if response == choices[0]:
-                    delete_patient(patient_database=patient_db, room_database=room_db,
-                                   bed_database=bed_db)
+                    if isEmptyDatabase(patient_db):
+                        print("Patient database empty. Please add new patient first.")
+                    else:
+                        delete_patient(patient_database=patient_db, room_database=room_db,
+                                    bed_database=bed_db)
                     
                 elif response == choices[1]:
-                    delete_room(room_database=room_db,
-                                bed_database=bed_db)
+                    if isEmptyDatabase(room_db):
+                        print("Room database empty. Please add new patient or new visit first.")
+                    else:
+                        delete_room(room_database=room_db,
+                                    bed_database=bed_db)
                     
                 elif response == choices[2]:
                     delete_bed(bed_database=bed_db)
@@ -242,6 +272,7 @@ def main():
         else:
             break
     
+### SIMPLIFY ###
 if __name__ == "__main__":
     clear_screen()
 
@@ -253,15 +284,35 @@ if __name__ == "__main__":
     ROOM_DB_PATH = os.path.join(CURRENT_DIR, "room_data.csv")
     BED_DB_PATH = os.path.join(CURRENT_DIR, "bed_data.csv")
 
-    # load data
-    patient_db = load_patient(PATIENT_DB_PATH)
-    room_db = load_room(ROOM_DB_PATH)
-    bed_db = load_bed(BED_DB_PATH)
-
-    print('\n=== Welcome to JCDS Purwadhika Patient Admission Data System ===')
-
-    # run main program
-    main()
+    patient_file_size = os.path.getsize(PATIENT_DB_PATH)
+    room_file_size = os.path.getsize(ROOM_DB_PATH)
+    bed_file_size = os.path.getsize(BED_DB_PATH)
+    
+    ### SIMPLIFY ###
+    if patient_file_size > 0 and room_file_size > 0 and bed_file_size > 0:
+        # load data
+        bed_db = load_bed(BED_DB_PATH)
+        if not isEmptyDatabase(bed_db):
+            patient_db = load_patient(PATIENT_DB_PATH)
+            room_db = load_room(ROOM_DB_PATH)
+            
+            print('\n=== Welcome to JCDS Purwadhika Patient Admission Data System ===')
+            # run main program
+            main()
+            # keep database updated
+            dict_of_list_to_csv(PATIENT_DB_PATH, patient_db)
+            list_of_dict_to_csv(ROOM_DB_PATH, room_db)
+            list_of_dict_to_csv(BED_DB_PATH, bed_db)
+        else:
+            print("Bed database empty. Please enter bed availability first.")
+    else:
+        if patient_file_size == 0:
+            print("Patient database empty.")
+        if room_file_size == 0:
+            print("Room database empty.")
+        if bed_file_size == 0:
+            print("Bed database empty.")
+        print("Please enter initial data first.")
     
     # end program
     sys.exit()
