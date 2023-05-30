@@ -900,7 +900,7 @@ def add_new_patient(patient_database, room_database, bed_database, room_type):
                                                new_room_type= room_type,
                                                old_room_type=None)
             
-            print("Data saved.")
+            print("Data successfully saved.")
         else:
             print("Data not saved.")
 
@@ -957,7 +957,7 @@ def add_returning_patient(patient_database, room_database, bed_database, room_ty
             bed_database = update_bed_database(database=bed_database,
                                                new_room_type=room_type,
                                                old_room_type=None)
-            print("Data saved.")
+            print("Data successfully saved.")
         else:
             print("Data not saved.")
         
@@ -994,10 +994,10 @@ def modify_patient(patient_database):
             patient_data = display_profile(patient_database, patient_id)
             prompt = "\nModify:\n"
             choices = ["First name",
-                        "Last name",
-                        "Gender",
-                        "Birth date",
-                        "Return to previous menu"]
+                       "Last name",
+                       "Gender",
+                       "Birth date",
+                       "Return to previous menu"]
             response = pyip.inputMenu(prompt=prompt, choices=choices, numbered=True)
 
             if response == choices[-1]:
@@ -1034,7 +1034,7 @@ def modify_patient(patient_database):
                     confirmation = pyip.inputYesNo(prompt="\nConfirm changes? (yes/no): ")
                     if confirmation == "yes":
                         patient_database[patient_id][key_index] = new_value
-                        print("Data saved.")
+                        print("Data succesfully saved.")
                     else:
                         print("Data not saved.")
 
@@ -1093,7 +1093,7 @@ def modify_room(room_database, bed_database):
                         room_database[index]["Discharge_Date"] = current_date
                         room_database[index]["Status"] = new_status
                         bed_database = update_bed_database(database=bed_database, old_room_type=room_type, new_room_type=None)
-                        print("Data saved.")
+                        print("Data successfully saved.")
                         display_list_of_dict(room_database)
 
                     else:
@@ -1137,7 +1137,7 @@ def modify_room(room_database, bed_database):
                         update_bed_database(database=bed_database,
                                             old_room_type=old_room_type,
                                             new_room_type=new_room_type)
-                        print("Data saved.")
+                        print("Data successfully saved.")
                         display_list_of_dict(room_database)
 
                     else:
