@@ -429,7 +429,10 @@ def get_max_index(database):
     Returns
         int
     '''
-    return max([row["Index"] for row in database[1:]])
+    if isEmptyDatabase(database):
+        return 0
+    else:
+        return max([row["Index"] for row in database[1:]])
 
 def get_max_patient_id(database):
     '''
