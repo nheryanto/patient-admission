@@ -95,7 +95,9 @@ def filter_range_date(data, header, key, start_date, end_date):
     Returns:
         list
     '''
+    # get index of key in header
     index = header.index(key)
+    # get row where start_date <= row[index] <= end_date for each row in data
     filtered_data = list(filter(lambda row: row[index] >= start_date and row[index] <= end_date, data))
     return filtered_data
 
@@ -109,7 +111,7 @@ def get_dict_of_list_data_header(database):
     Returns:
         list, list
     '''
-    # convert values of db into list without the header row
+    # convert values of database into list without the header row
     data = list(database.values())[1:]
     # get header row from db
     header = database['column']
@@ -183,6 +185,7 @@ def display_ordered_data_header(data, header):
     Returns:
         None
     '''
+    # reordering index
     ordered_data = [[i] + row[1:] for i, row in enumerate(data)]
     print()
     print(tabulate.tabulate(ordered_data, header, tablefmt="outline"))
@@ -202,6 +205,7 @@ def display_profile(patient_database, patient_id, title="=== Patient Profile ===
     print(title)
     headings = patient_database['column']
     for i, value in enumerate(patient_database[patient_id]):
+        # separate headings containing underscores with a single space
         header = ' '.join(headings[i].split(sep='_'))
         print(f"{header:20} : {value}")
 
@@ -223,6 +227,7 @@ def display_selected_data(data, header, title):
         print()
         print(title)
         for key, value in zip(header, data):
+            # to handle cases when key or value contains underscores and separate them with a single space
             try:
                 key = ' '.join(key.split(sep='_'))
                 value = ' '.join(value.split(sep='_'))
@@ -257,6 +262,7 @@ def isDuplicateProfile(database, profile):
     for key, value in database.items():
         if key == 'column':
             continue
+        # get key of matched profile
         else:
             if value[1:] == profile:
                 key_match = key
@@ -397,13 +403,19 @@ def update_bed_database(database, old_room_type, new_room_type):
         list of dict
     '''
     headings = database[0]
+    # assign copy of most recent data to new data
     new_data = database[-1].copy()
+    # set index of new data
     new_data[headings[0]] = get_max_index(database)+1
+    # set current timestamp
     new_data[headings[1]] = get_current_datetime_str()
+    # if room type check out, add count by 1
     if old_room_type:
         new_data[old_room_type] += 1
+    # if room type check in, minus count by 1
     if new_room_type:
         new_data[new_room_type] -= 1
+    # add new data to database
     database.append(new_data)
     return database
 
@@ -466,6 +478,7 @@ def input_patient_id():
     isBreak = False
     while True:
         patient_id = pyip.inputStr(prompt="\nEnter Patient ID (e.g. P-1) or 0 to cancel: ")
+        # to make case insensitive
         patient_id = patient_id.capitalize()
         if patient_id == "0":
             isBreak = True
@@ -512,11 +525,9 @@ def input_gender():
     '''
     isBreak = False
     choices = ["Male", "Female", "Return to previous menu"]
-    while True:
-        gender = pyip.inputMenu(prompt="\nSelect gender:\n", choices=choices, numbered=True)
-        if gender == choices[-1]:
-            isBreak = True
-        break
+    gender = pyip.inputMenu(prompt="\nSelect gender:\n", choices=choices, numbered=True)
+    if gender == choices[-1]:
+        isBreak = True
     return gender, isBreak
 
 def input_date(type):
@@ -607,11 +618,19 @@ def update_total_patient(bed_database, total_patient):
     Returns:
         dict
     '''
+    total_patient["Total"] = 0
     for key in total_patient:
         if key == "Timestamp":
+            # get current timestamp
             total_patient[key] = get_current_datetime_str()
+
+        elif key == "Total":
+            continue
+
         else:    
+            # total patient = capacity - current bed count
             total_patient[key] = bed_database[1][key] - bed_database[-1][key]
+            total_patient["Total"] += total_patient[key]
     return total_patient
 
 def display_patient(database):
@@ -627,7 +646,7 @@ def display_patient(database):
     data, header = get_dict_of_list_data_header(database)
 
     while True:
-        prompt = "\nDisplay by:\n"
+        prompt = "\n=== Display Patient Menu ===\nDisplay by:\n"
         choices = ["All data",
                    "Patient ID",
                    "First name",
@@ -690,7 +709,7 @@ def display_room(database):
     data, header = get_list_of_dict_data_header(database)
 
     while True:
-        prompt = "\nDisplay by:\n"
+        prompt = "\n=== Display Room Menu ===\nDisplay by:\n"
         choices = ["All data",
                    "Patient ID",
                    "Room type",
@@ -752,7 +771,7 @@ def display_bed(database):
     '''
     data, header = get_list_of_dict_data_header(database)
     while True:
-        prompt = "\nDisplay by:\n"
+        prompt = "\n=== Display Bed Menu ===\nDisplay by:\n"
         choices = ["All data",
                    "Most recent",
                    "Range date",
@@ -775,9 +794,12 @@ def display_bed(database):
                 end_date, isBreak = input_date(type="end")
                 if isBreak:
                     break
-
+                
+                # convert start date into isoformat
                 start_date = parser.isoparse(start_date).astimezone().isoformat()
+                # set end date time to 23:59:59
                 end_date = parser.isoparse(end_date) + timedelta(days=1) - timedelta(seconds=1)
+                # convert end date into isoformat
                 end_date = end_date.astimezone().isoformat()
 
                 if start_date > end_date:
@@ -806,9 +828,10 @@ def display_total_patient(database):
         None
     '''
     print()
-    print("=== Total Patient ===")
+    print("=== Total Ongoing Patient ===")
     for key, value in database.items():
         try:
+            # separate key or value containing underscores with a single space
             key = ' '.join(key.split(sep='_'))
             value = ' '.join(value.split(sep='_'))
             print(f"{key:20} : {value}")
@@ -1090,6 +1113,11 @@ def modify_room(room_database, bed_database):
                         print("Cannot modify COMPLETED or NULL entries.")
                         continue
                     
+                    tmp_data = room_database[index].copy()
+                    tmp_data = list(tmp_data.values())[1:]
+                    header = room_database[0][1:]
+                    display_selected_data(tmp_data, header, title="=== Room Admission Data ===")
+                    
                     new_room_type, isBreak = input_room_type()
 
                     if isBreak:
@@ -1144,8 +1172,9 @@ def delete_patient(patient_database, room_database):
             print(f"Patient ID {patient_id} is already deleted.")
             continue
 
-        if isOngoingPatient(patient_database, patient_id):
+        if isOngoingPatient(room_database, patient_id):
             print("Cannot delete ONGOING patient. Please mark status as COMPLETED first.")
+            continue
         
         display_profile(patient_database, patient_id)
         confirmation = pyip.inputYesNo(prompt="\nConfirm deletion? (yes/no): ")
@@ -1162,4 +1191,5 @@ def delete_patient(patient_database, room_database):
                     display_list_of_dict(database=room_database)
         else:
             print("Deletion canceled.")
+        
         break

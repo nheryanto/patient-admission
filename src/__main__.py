@@ -168,6 +168,7 @@ def load_total_patient(database):
         if key == "Index":
             continue
         total_patient[key] = None
+    total_patient["Total"] = None
     return total_patient
 
 def dict_of_list_to_csv(FILE_PATH, database):
@@ -203,7 +204,6 @@ def list_of_dict_to_csv(FILE_PATH, database):
     writer.writerows(database)
     file.close()
 
-### ADD SUBMENU TITLES ###
 def main():
     '''
     Main program to run the entire process
@@ -227,7 +227,7 @@ def main():
         
         if response == choices[0]:
             while True:
-                prompt = "\nPlease select one of the following:\n"
+                prompt = "\n=== Display Menu ===\nPlease select one of the following:\n"
                 choices = ["Display patient data",
                            "Display room data",
                            "Display bed data",
@@ -268,7 +268,7 @@ def main():
             
                 if isAvailableRoom(most_recent_data, bed_header, room_type):
                     while True:
-                        prompt = "\nPlease select one of the following:\n"
+                        prompt = "\n=== Add Menu ===\nPlease select one of the following:\n"
                         choices = ["Add new patient",
                                    "Add returning patient",
                                    "Return to previous menu"]
@@ -288,14 +288,14 @@ def main():
                         break
                 
                 else:
-                    prompt = "\nRoom is not available. Reenter desired room type? (yes/no): "
+                    prompt = "\nRoom is not available. Reenter room type? (yes/no): "
                     response = pyip.inputYesNo(prompt=prompt)
                     if response == "yes": continue
                     else: break
 
         elif response == choices[2]:
             while True:
-                prompt = "\nPlease select one of the following:\n"
+                prompt = "\n=== Modify Menu ===\nPlease select one of the following:\n"
                 choices = ["Modify patient data",
                            "Modify room data",
                            "Return to main menu"]
@@ -319,10 +319,8 @@ def main():
 
         elif response == choices[3]:
             while True:
-                prompt = "\nPlease select one of the following:\n"
+                prompt = "\n=== Delete Menu ===\nPlease select one of the following:\n"
                 choices = ["Delete patient data",
-                        #   "Delete room data",
-                        #   "Delete bed data",
                            "Return to main menu"]
                 response = pyip.inputMenu(prompt=prompt, choices=choices, numbered=True)
 
@@ -330,18 +328,7 @@ def main():
                     if isEmptyDatabase(patient_db):
                         print("Patient database empty. Please add new patient first.")
                     else:
-                        delete_patient(patient_database=patient_db, room_database=room_db,
-                                    bed_database=bed_db)
-                    
-                #elif response == choices[1]:
-                #    if isEmptyDatabase(room_db):
-                #        print("Room database empty. Please add new patient or new visit first.")
-                #    else:
-                #        delete_room(room_database=room_db,
-                #                    bed_database=bed_db)
-                    
-                #elif response == choices[2]:
-                #    delete_bed(bed_database=bed_db)
+                        delete_patient(patient_database=patient_db, room_database=room_db)
 
                 else:
                     break
