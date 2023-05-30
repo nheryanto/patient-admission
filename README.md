@@ -1,5 +1,5 @@
 # Patient Admission Data System
-A simple application to track patient admission based on hospital room types (VVIP, VIP, Kelas 1, Kelas 2, Kelas 3).
+A simple application to track patient admission.
 
 ## Installation
 To clone from github, run:
